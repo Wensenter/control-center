@@ -6,7 +6,7 @@
                 <span v-show="isShowAsideTitle">后台管理系统</span>
             </div>
             <!-- 菜单栏 -->
-            <Menu ref="siderMenu" theme="dark" width="100%" @on-select="gotoPage"
+            <Menu ref="asideMenu" theme="dark" width="100%" @on-select="selectMenuCallback"
             accordion :open-names="openMenus" :active-name="currentPage" @on-open-change="menuChange">
             <!-- 动态菜单 -->
                 <div v-for="(item, index) in menuItems" :key="index">
@@ -161,6 +161,8 @@ export default {
             isShowAsideTitle:true,// 是否展示侧边栏内容
             currentPage:'',//当前显示页面
             openMenus:[],// 要打开的菜单名字 name属性
+            menuCache: [], // 缓存已经打开的菜单
+            hasNewMsg: true, // 是否有新消息
             isShowRouter: true,
             asideClassName: 'aside-big', // 控制侧边栏宽度变化
             msgNum: '10', // 新消息条数
@@ -168,7 +170,7 @@ export default {
             // 数据格式 {text: '首页', name: 'home'}
             // 用于缓存打开的路由 在标签栏上展示
             tagsArry: [],
-             arrowUp: false, // 用户详情向上箭头
+            arrowUp: false, // 用户详情向上箭头
             arrowDown: true, // 用户详情向下箭头
             main: null, // 页面主要内容区域
             asideClassName: 'aside-big', // 控制侧边栏宽度变化
@@ -185,11 +187,36 @@ export default {
          // 第一个标签
         const name = this.$route.name
         this.currentPage = name
+        this.tagsArry.push({
+            text: this.nameToTitle[name],
+            name,
+        })
+
+        //根据路由打开对应的菜单栏
+        this.openMenus = this.getMenus(name)
+        this.$nextTick(()=>{
+            this.$refs.asideMenu.updateOpened()
+        })
+
+        // 设置用户信息
+        this.userName = localStorage.getItem('userName')
+        this.userImg = localStorage.getItem('userImg')
+
+        this.main = document.querySelector('.sec-right')
+        this.asideArrowIcons = document.querySelectorAll('aside .ivu-icon-ios-arrow-down')
+
+        // 监听窗口大小 自动收缩侧边栏
+        this.monitorWindowSize()
     },
     computed:{
         //菜单栏
         menuItems() {
             return this.$store.state.routes.menuItems
+        },
+
+        // 需要缓存的路由
+        keepAliveData() {
+            return this.tagsArry.map(item => item.name)
         },
 
         // 由于iView的导航菜单比较坑 只能设定一个name参数
@@ -204,8 +231,242 @@ export default {
         },
     },
     methods:{
-        gotoPage(){},
-        menuChange(){},
+        getMenus(name) {
+            let menus
+            const tagTitle = this.nameToTitle[name]
+            for (let i = 0, l = this.menuItems.length; i < l; i++) {
+                const item = this.menuItems[i]
+                menus = []
+                menus[0] = i
+                if (item.text == tagTitle) {
+                    return menus
+                }
+
+                if (item.children) {
+                    for (let j = 0, ll = item.children.length; j < ll; j++) {
+                        const child = item.children[j]
+                        menus[1] = i + '-' + j
+                        menus.length = 2
+                        if(child.text == tagTitle) {
+                            return menus
+                        }
+
+                        if (child.children) {
+                            for (let k = 0, lll = child.children.length; k < lll; k++) {
+                                const grandson = child.children[k]
+                                menus[2] = i + '-' + j + '-' + k
+                                if (grandson.text == tagTitle) {
+                                    return menus
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        monitorWindowSize() {
+            let w = document.documentElement.clientWidth || document.body.clientWidth
+            if( w < 1300) {
+                this.shrinkAside()
+            }
+
+            window.onresize = () => {
+                // 可视窗口宽度太小 自动收缩侧边栏
+                if( w < 1300 && this.isShowAsideTitle 
+                    && w > (document.documentElement.clientWidth || document.body.clientWidth)) {
+                        this.shrinkAside()
+                    }
+
+                    w = document.documentElement.clientWidth || document.body.clientWidth
+            }
+        },
+        // 判断当前标签页是否是激活状态
+        isActive(name) {
+            return this.$route.name === name
+        },
+        gotoPage(name, params) {
+            this.currentPage = name
+            this.crumbs = this.paths[name]
+            this.$router.push({name,params})
+
+            if(!this.keepAliveData.includes(name)) {
+                // 如果标签超过8个 则将第一个标签删除
+                if(this.tagsArry.length == 8) {
+                    this.tagsArry.shift()
+                }
+                this.tagsArry.push({name, text: this.nameToTitle[name]})
+            }
+        },
+        // 选择菜单回调函数
+        selectMenuCallback(name) {
+            if(name.includes('external-link')) return
+            this.gotoPage(name)
+            this.expandAside()
+            setTimeout(()=>{
+                this.isShowAsideTitle = true
+            })
+        },
+        // 用户操作
+        userOperate(name) {
+            switch (name) {
+                case '1':
+                    // 修改密码
+                    this.gotoPage('password')
+                    break
+                case '2':
+                    // 基本资料
+                    this.gotoPage('userinfo')
+                    break
+                case '3':
+                    // 退出登录
+                    resetTokenAndClearUser()
+                    this.$router.push({ name: 'login' })
+                    break
+            }
+        },
+        menuChange(data){
+            this.menuCache = data
+        },
+        //控制用户三角箭头显示状态
+        showArrow(flag) {
+            this.arrowUp = flag
+            this.arrowDown = !flag
+        },
+        //判断
+        isShrinkAside() {
+            if (this.isShowAsideTitle) {
+                this.shrinkAside()
+            } else {
+                this.expandAside()
+            }
+        },
+        //收缩
+        shrinkAside() {
+            for (let i = 0, len = this.asideArrowIcons.length; i < len; i++) {
+                this.asideArrowIcons[i].style.display = 'none'
+            }
+
+            this.isShowAsideTitle = false
+            this.openMenus = []
+            this.$nextTick(()=>{
+                if(this.$refs.asideMenu) {
+                    this.$refs.asideMenu.updateOpened()
+                }
+            })
+
+            setTimeout(()=>{
+                this.asideClassName = ''
+                this.main.style.marginLeft = '90px'
+            },0)
+        },
+        //展开
+        expandAside() {
+            setTimeout(()=>{
+                this.isShowAsideTitle = true
+                for(let i = 0, len = this.asideArrowIcons.length; i < len; i++){
+                    this.asideArrowIcons[i].style.display = 'block'
+                }
+
+                this.openMenus = this.menCache
+                if(this.$refs.asideMenu) {
+                    this.$refs.asideMenu.updateOpened()
+                }
+            },200)
+        },
+        //刷新当前标签页
+        reloadPage() {
+            let name = this.$route.name
+            let index = this.keepAliveData.indexOf(name)
+            this.$nextTick(()=>{
+                if(this.tagsArry.length) {
+                    this.isShowRouter = false
+                    this.tagsArry.splice(index,1)
+                    this.$nextTick(() => {
+                        this.tagsArry.splice(index,0,{name, text: this.nameToTitle[name] })
+                        this.gotoPage(name)
+                        this.isShowRouter = true
+                    })
+                } else {
+                    this.isShowRouter = false
+                    this.$nextTick(() => {
+                        this.tagsArry.splice(index, 0, { name, text: this.nameToTitle[name] })
+                        this.gotoPage(name)
+                        this.isShowRouter = true
+                    })
+                }
+            })
+        },
+        //关闭单个标签
+        closeTag(i) {
+            let name = this.tagsArry[i].name
+            this.tagsArry.splice(i , 1)
+            window.event.stopPropagation()
+            // 如果关闭的是当前标签 则激活前一个标签
+            // 如果关闭的是第一个标签 则激活后一个标签
+            if(this.tagsArry.length) {
+                if(this.isActive(name)) {
+                    if(i != 0) {
+                        this.gotoPage(this.tagsArry[i-1].name)
+                    } else {
+                        this.gotoPage(this.tagsArry[i].name)
+                    }
+                }
+            }else if(name != this.home) {
+                this.gotoPage(this.home)
+            }else {
+                this.reloadPage()
+            }
+        },
+        // 根据路由名称关闭页面
+        closeName(name) {
+            for(let i = 0, len = this.tagsArry.length; i < len; i++) {
+                if(this.tagsArry[i].name == name) {
+                    this.closeTag(i)
+                    break
+                }
+            }
+        },
+        // 批量关闭标签
+        closeTags(flag) {
+            if (flag == 1) {
+                //关闭其他标签
+                this.tagsArry = []
+                this.gotoPage(this.$route.name)
+            } else {
+                //关闭所有标签
+                this.tagsArry = []
+                this.gotoPage(this.home)
+                this.reloadPage()
+            }
+        },
+        // 激活标签
+        activeTag(i) {
+            this.gotoPage(this.tagsArry[i].name)
+        },
+        // 激活标签
+        info() {
+            const self = this
+            this.$Notice.info({
+                title: `您有${this.msgNum}条消息`,
+                render(h) {
+                    return h('Button', {
+                        attrs: {
+                            type: 'info',
+                            size: 'small',
+                        },
+                        on: {
+                            click() {
+                                self.gotoPage('msg')
+                                self.hasNewMsg = false
+                                self.msgNum = 0
+                            }
+                        }
+                    },[
+                        '点击查看',
+                    ])
+                }
+            })
+        },
         processNameToTitle(obj, data, text) {
             if (data.name) {
                 obj[data.name] = data.text

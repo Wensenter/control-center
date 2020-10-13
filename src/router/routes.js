@@ -18,11 +18,6 @@ const commonRoutes = [
         meta: { title: '404' },
         component: () => import('../views/404'),
     },
-    {   path: '/home',
-        name:'Home',
-        meta: { title:'Home' },
-        component: () => import('../components/main'),
-    },
     {   path: '/',
         redirect: '/home' 
     },

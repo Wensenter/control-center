@@ -6,23 +6,29 @@ Vue.use(VueRouter)
 
 
 export const asyncRoutes = {
-  // home: {
-  //     path: 'home',
-  //     name: 'home',
-  //     meta: { title: '主页' },
-  //     component: () => import('../views/Home'),
-  // },
+  home: {
+      path: 'home',
+      name: 'home',
+      meta: { title: '主页' },
+      component: () => import('../components/main'),
+  },
   Table: {
       path: 't1',
       name: 't1',
       meta: { title: '表格' },
       component: () => import('../views/Table'),
   },
-  Echarts: {
+  Password: {
       path: 'password',
       name: 'password',
-      meta: { title: 'Echarts' },
-      component: () => import('../views/Echarts'),
+      meta: { title: 'Password' },
+      component: () => import('../views/Password'),
+  },
+  Echarts: {
+    path: 'password',
+    name: 'password',
+    meta: { title: 'Echarts' },
+    component: () => import('../views/Echarts'),
   },
   msg: {
       path: 'msg',
