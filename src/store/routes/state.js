@@ -27,10 +27,10 @@ const state = {
             children: [
                 {
                     type: 'ios-grid',
-                    name: 't1',
+                    name: 'table',
                     text: '表格',
                     // hidden 属性 隐藏此菜单 可以通过在地址栏上输入对应的 URL 来显示页面
-                    // hidden: true,
+                    //hidden: true,
                 },
                 {
                     size: 18, // icon大小

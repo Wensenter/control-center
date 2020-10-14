@@ -152,11 +152,13 @@
 
 <script>
 
+import { resetTokenAndClearUser } from '@/utils'
+
 export default {
     name:'layout',
     data(){
         return {
-            logo: require('../../assets/logo.png'), //logo路径
+            logo: require('../../assets/imgs/logo.png'), //logo路径
             paths: {},// 用于储存页面路径
             isShowAsideTitle:true,// 是否展示侧边栏内容
             currentPage:'',//当前显示页面
@@ -202,11 +204,33 @@ export default {
         this.userName = localStorage.getItem('userName')
         this.userImg = localStorage.getItem('userImg')
 
-        this.main = document.querySelector('.sec-right')
+        this.main = document.querySelector('.right')
         this.asideArrowIcons = document.querySelectorAll('aside .ivu-icon-ios-arrow-down')
 
         // 监听窗口大小 自动收缩侧边栏
         this.monitorWindowSize()
+    },
+    watch: {
+        $route(to) {
+            const name = to.name
+            this.currentPage = name
+            if(name == 'error') {
+                this.crumbs = '404'
+                return
+            }
+            if(!this.keepAliveData.includes(name)) {
+                // 如果标签超过8个 则将第一个标签删除
+                if(this.tagsArry.length == 8) {
+                    this.tagsArry.shift()
+                }
+
+                this.tagsArry.push({ name, text: this.nameToTitle[name] })
+            }
+
+            setTimeout(()=>{
+                this.crumbs = this.paths[name]
+            },0)
+        }
     },
     computed:{
         //菜单栏
@@ -372,6 +396,8 @@ export default {
                     this.$refs.asideMenu.updateOpened()
                 }
             },200)
+            this.asideClassName = 'aside-big'
+            this.main.style.marginLeft = '220px'
         },
         //刷新当前标签页
         reloadPage() {

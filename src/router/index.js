@@ -10,15 +10,15 @@ export const asyncRoutes = {
       path: 'home',
       name: 'home',
       meta: { title: '主页' },
-      component: () => import('../components/main'),
+      component: () => import('../views/Home'),
   },
-  Table: {
-      path: 't1',
-      name: 't1',
+  table: {
+      path: 'table',
+      name: 'table',
       meta: { title: '表格' },
       component: () => import('../views/Table'),
   },
-  Password: {
+  password: {
       path: 'password',
       name: 'password',
       meta: { title: 'Password' },
@@ -51,8 +51,17 @@ const router = new VueRouter({
   routes
 })
 
+//修复路由重复push
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push (location, onResolve, onReject) {
+  if (onResolve || onReject){
+    return originalPush.call(this, location, onResolve, onReject)
+  }
+  return originalPush.call(this, location).catch(err => err)
+}
+
 //重置路由
-const createRouter = () => new Router({
+const createRouter = () => new VueRouter({
   routes: routes,
 })
 

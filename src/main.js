@@ -4,8 +4,9 @@ import router from './router'
 import ViewUI from 'view-design'
 import 'view-design/dist/styles/iview.css'
 import '@/styles/index.styl'
-import './mock'
 import store from './store'
+import './mock'
+import './permission'
 
 Vue.config.productionTip = false
 Vue.use(ViewUI)

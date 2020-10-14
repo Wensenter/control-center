@@ -2,12 +2,12 @@ import { LoadingBar } from 'view-design'
 import router from './router'
 import store from './store'
 import createRoutes from '@/utils/createRoutes'
-import { getDocmentTitle, resetTokenAndClearUser } from './utils'
+import { getDocumentTitle, resetTokenAndClearUser } from './utils'
 
 //是否有菜单数据
 let hasMenus = false
 router.beforeEach(async (to, from, next) => {
-    document.title = getDocmentTitle(to.meta.title)
+    document.title = getDocumentTitle(to.meta.title)
     LoadingBar.start()
     if(localStorage.getItem('token')) {
         if (to.path === '/login') {
