@@ -10,7 +10,7 @@
             accordion :open-names="openMenus" :active-name="currentPage" @on-open-change="menuChange">
             <!-- 动态菜单 -->
                 <div v-for="(item, index) in menuItems" :key="index">
-                    <Submenu v-if="item.children" :name="index">
+                    <Submenu :class="isShowAsideTitle? '' : 'shrink'" v-if="item.children" :name="index">
                         <template slot="title">
                             <Icon :size="item.size" :type="item.type"/>
                             <span v-show="isShowAsideTitle">{{item.text}}</span>
@@ -508,7 +508,7 @@ export default {
 }
 
 </script>
-<style lang="stylus">
+<style lang="stylus" scoped>
 .app-wrapper
     position relative
     width 100%
@@ -523,6 +523,7 @@ aside
     transition width .3s
     background #20222A
     padding 0
+    line-height 1.5
 .aside-big
     width 220px
 .logo-c

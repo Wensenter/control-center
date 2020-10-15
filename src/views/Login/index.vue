@@ -18,6 +18,7 @@
 </template>
 
 <script>
+import { GetUserInfo } from '@/api/request'
 export default {
   name: 'login',
   data() {
@@ -66,11 +67,14 @@ export default {
       if(this.account === 'admin' && this.pwd === 'admin') {
         this.isShowLoading = true
         // 登录成功
-        localStorage.setItem('userImg', '../../assets/imgs/user.png')
-        localStorage.setItem('userName', 'wensenter')
-        // 登录成功 假设这里是后台返回的 token
-        localStorage.setItem('token', 'is_token')
-        this.$router.push({path: this.redirect || '/'})
+        GetUserInfo({account:this.account,pwd:this.pwd}).then(res=>{
+          console.log(res)
+        })
+        // localStorage.setItem('userImg', '../../assets/imgs/user.png')
+        // localStorage.setItem('userName', 'wensenter')
+        // // 登录成功 假设这里是后台返回的 token
+        // localStorage.setItem('token', 'is_token')
+        // this.$router.push({path: this.redirect || '/'})
       } else {
         if(this.account !== 'admin') {
           this.accountError = '账号为admin'
