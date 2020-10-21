@@ -13,11 +13,11 @@ export default {
     name: 'App',
     data() {
         return {
-            keepAliveData: ['manage'],
+
         }
     },
     computed: {
-        ...mapState([
+        ...mapState('routes',[
             'isShowLoading',
         ]),
     },

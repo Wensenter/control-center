@@ -6,7 +6,6 @@ export function showLoading() {
     if(loadingCounter === 0) {
         store.commit('routes/setLoading', true)
     }
-
     loadingCounter++
 }
 

@@ -68,13 +68,13 @@ export default {
         this.isShowLoading = true
         // 登录成功
         GetUserInfo({account:this.account,pwd:this.pwd}).then(res=>{
-          console.log(res)
+          let {userImg,userName,token} = res
+          localStorage.setItem('userImg', userImg)
+          localStorage.setItem('userName', userName)
+          // 登录成功 假设这里是后台返回的 token
+          localStorage.setItem('token', token)
+          this.$router.push({path: this.redirect || '/'})
         })
-        // localStorage.setItem('userImg', '../../assets/imgs/user.png')
-        // localStorage.setItem('userName', 'wensenter')
-        // // 登录成功 假设这里是后台返回的 token
-        // localStorage.setItem('token', 'is_token')
-        // this.$router.push({path: this.redirect || '/'})
       } else {
         if(this.account !== 'admin') {
           this.accountError = '账号为admin'

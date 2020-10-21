@@ -20,7 +20,6 @@ router.beforeEach(async (to, from, next) => {
                 // 这里可以用 await 配合请求后台数据来生成路由
                 const data = await GetMenu()
                 const routes = createRoutes(data)
-                console.log(routes)
                 // 从store中获取
                 //const routes = createRoutes(store.state.routes.menuItems)
                 //动态路由

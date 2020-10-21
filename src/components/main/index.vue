@@ -642,12 +642,11 @@ a
         color #fff
 // 主要内容区域
 .main-content
-    height calc(100% - 88px)
+    height calc(100vh - 92px)
     overflow auto
 .view-c
     position relative
     height 100%
-    overflow hidden
 .pointer
     cursor pointer
 .crumbs

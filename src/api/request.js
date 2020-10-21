@@ -14,3 +14,10 @@ export function GetUserInfo(data){
         method:'post'
     })
 }
+
+export function fetchUserData(){
+    return Service({
+        url:'/api/userData',
+        method:'get'
+    })
+}
